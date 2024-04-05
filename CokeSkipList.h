@@ -9,8 +9,7 @@
 #include <iostream>
 #include <random>
 #include <fstream>
-//#include <mutex>
-
+#include <mutex>
 
 template<typename K, typename V>
 class CokeSkipList {
@@ -39,6 +38,10 @@ private:
     int elementCount;
     std::ifstream myFileReader;
     std::ofstream myFileWriter;
+
+    int readersCount;
+    std::mutex writeMutex;
+    std::mutex rCountMutex;
 };
 
 template<typename K, typename V>
@@ -47,6 +50,7 @@ CokeSkipList<K, V>::CokeSkipList(int maxLevel) {
     this->maxLevel = maxLevel;
     this->currLevel = 0;
     this->elementCount = 0;
+    this->readersCount = 0;
 
     K key;
     V value;
@@ -88,6 +92,14 @@ int CokeSkipList<K, V>::size() {
 
 template<typename K, typename V>
 Node<K, V>* CokeSkipList<K, V>::searchElement(K key) {
+    std::unique_lock<std::mutex> rCMutex(rCountMutex);
+    if (this->readersCount == 0) {
+        writeMutex.lock();
+    }
+    readersCount++;
+//    std::cout << "readersCount = " << readersCount << std::endl;
+    rCMutex.unlock();
+
 #ifdef DEBUG_ENABLED
     std::cout << "Search Element with Key = " << key << std::endl;
 #endif
@@ -101,6 +113,12 @@ Node<K, V>* CokeSkipList<K, V>::searchElement(K key) {
 
     // 这时候已经到了第0层
     current = current->nexts[0];
+
+    rCMutex.lock();
+    readersCount--;
+    if (readersCount == 0) { // 位置会不会不太好，万一一放了锁，其他线程把这个节点删除了？
+        writeMutex.unlock();
+    }
 
     if (current != nullptr && current->getKey() == key) {
 #ifdef DEBUG_ENABLED
@@ -119,16 +137,19 @@ Node<K, V>* CokeSkipList<K, V>::searchElement(K key) {
 // 跳表删除节点
 template<typename K, typename V>
 bool CokeSkipList<K, V>::deleteElement(K key) {
-    Node<K, V>* ans = searchElement(key);
-    // 如果压根就没有该元素，则删除失败返回false
-    if (ans == nullptr) return false;
-
+    std::unique_lock<std::mutex> wMutex(writeMutex);
     Node<K, V>* current = header;
     Node<K, V>* deleteNode = nullptr;
 
     for (int i = currLevel; i >= 0; i--) {
         while (current->nexts[i] != nullptr && current->nexts[i]->getKey() < key) {
             current = current->nexts[i];
+        }
+        if (i == 0 && (current->nexts[0] == nullptr || current->nexts[0]->getKey() != key)) {
+#ifdef DEBUG_ENABLED
+            std::cout << "[DELETE FAILED] key does not exist " << key << std::endl;
+#endif
+            return false;
         }
         // 如果第i层中出现了需要删除的元素，通过链表指针的改动实现删除
         if (current->nexts[i] != nullptr && current->nexts[i]->getKey() == key) {
@@ -176,6 +197,8 @@ template<typename K, typename V>
 int CokeSkipList<K, V>::insertElement(K key, V value) {
     // 1. 插入的元素如果存在，则进行修改
     // 2. 插入的元素如果不存在，则计算出level值，level中都加该节点
+    std::unique_lock<std::mutex> wMutex(writeMutex);
+
     Node<K, V>* current = header;
     std::vector<Node<K, V>*> preNode(maxLevel, nullptr);
 
@@ -187,6 +210,7 @@ int CokeSkipList<K, V>::insertElement(K key, V value) {
     }
 
     current = current->nexts[0];
+
 
     // 如果元素存在，进行更新操作
     if (current != nullptr && current->getKey() == key) {

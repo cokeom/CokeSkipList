@@ -1,10 +1,10 @@
+#define DEBUG_ENABLED
 #include <iostream>
 #include "CokeSkipList.h"
 #include "Node.h"
 #include <string>
 
 #define SAVE_PATH "../persistence_data/savedata1.txt"
-
 int main() {
 
 //    Node<int, int> node(1, 1, 1);

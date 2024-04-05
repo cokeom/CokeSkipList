@@ -1,18 +1,19 @@
 //
 // Created by Coke Lin.
 //
-
+//#define DEBUG_ENABLED
 #include <iostream>
 #include "Node.h"
 #include "CokeSkipList.h"
 #include <thread>
 
+// 1 131.95s
 #define THREAD_NUM 1
-#define TEST_NUM 10000
+#define TEST_NUM 100000
 
 CokeSkipList<int, std::string> skipList(15);
 void insertElement(int tid) {
-    std::cout << "insertElement Thread id = " << tid << std::endl;
+//    std::cout << "insertElement Thread id = " << tid << std::endl;
     int times = TEST_NUM / THREAD_NUM;
     std::random_device rd;
     std::mt19937 gen(rd());
@@ -23,7 +24,7 @@ void insertElement(int tid) {
 }
 
 void getElement(int tid) {
-    std::cout << "getElement Thread id = " << tid << std::endl;
+//    std::cout << "getElement Thread id = " << tid << std::endl;
     int tmp = TEST_NUM / THREAD_NUM;
     std::random_device rd;
     std::mt19937 gen(rd());
@@ -66,7 +67,7 @@ void stressTestGet() {
     auto finish = std::chrono::high_resolution_clock::now();
 
     std::chrono::duration<double> elapsed = finish - start;
-    std::cout << "Insert elapsed: " << elapsed.count() << std::endl;
+    std::cout << "get elapsed: " << elapsed.count() << std::endl;
 }
 
 int main() {
@@ -74,6 +75,6 @@ int main() {
 
 //    skipList.printSkipList();
 
-    stressTestGet();
+//    stressTestGet();
     return 0;
 }
