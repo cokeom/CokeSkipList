@@ -1,0 +1,32 @@
+node_modules/    # 忽略Node.js依赖模块目录
+dist/            # 忽略打包输出目录，通常是打包后的生产文件
+.cache/          # 忽略开发工具生成的缓存文件目录
+.env             # 忽略环境变量文件
+*.log            # 忽略日志文件
+.DS_Store        # 忽略macOS系统生成的隐藏文件
+
+.vscode/         # 忽略Visual Studio Code配置
+.idea/           # 忽略IntelliJ IDEA配置
+*.sublime-project  # 忽略Sublime Text项目文件
+
+yarn.lock        # 忽略Yarn依赖版本锁定文件
+package-lock.json # 忽略npm依赖版本锁定文件
+
+*.swp            # 忽略Vim的交换文件
+*.swo            # 忽略Vim的备份文件
+
+bower_components/  # 忽略Bower依赖目录
+.eslintcache/      # 忽略ESLint缓存文件目录
+.gitignore         # 忽略.gitignore文件（针对多个开发者的协作）
+build/             # 忽略构建输出目录
+log/               # 忽略日志文件目录
+tmp/               # 忽略临时文件目录
+tests/             # 忽略测试文件目录
+node_modules/      # 忽略Node.js依赖模块目录（如果使用Yarn，可忽略）
+/coverage/         # 忽略代码覆盖率报告
+
+.editorconfig      # 忽略.editorconfig文件
+.env.local         # 忽略本地开发环境配置文件
+
+cmake-build-debug/
+.idea/
